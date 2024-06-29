@@ -15,6 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey: configService.get<string>('jwt.secret'),
     });
   }
+
   validate(payload: any) {
     return this.userService.findById(payload.id);
   }
