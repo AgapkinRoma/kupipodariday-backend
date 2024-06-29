@@ -10,17 +10,18 @@ import { Offer } from './offers/offers.entity';
 import { Wish } from './wishes/wishes.entity';
 import { WishList } from './wishlists/wishlists.entity';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
+import configuration from './config/configuration';
+import { DatabaseConfigFactory } from './config/database-config-factory';
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'student',
-      password: 'student',
-      database: 'kupiproday',
-      entities: [User, Offer, Wish, WishList],
-      synchronize: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+      envFilePath: '.env',
+    }),
+    TypeOrmModule.forRootAsync({
+      useClass: DatabaseConfigFactory,
     }),
     UsersModule,
     WishesModule,

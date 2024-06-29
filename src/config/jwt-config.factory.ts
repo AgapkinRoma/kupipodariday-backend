@@ -5,12 +5,15 @@ import { JwtModuleOptions } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtConfigFactory implements JwtOptionsFactory {
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService) {
+    console.log(this.configService.get<string>('jwt.secret'));
+  }
+
   createJwtOptions(): JwtModuleOptions {
     return {
-      secret: this.configService.get<string>('jwt'),
+      secret: this.configService.get<string>('jwt.secret'),
       signOptions: {
-        expiresIn: this.configService.get<string>('jwt.ttl', '300s'),
+        expiresIn: this.configService.get<string>('jwt.ttl', '30000s'),
       },
     };
   }

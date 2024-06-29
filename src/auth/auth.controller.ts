@@ -14,7 +14,7 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('signin')
-  login(@AuthUser() user) {
+  login(@AuthUser() user, @Body() signinUser) {
     return this.authService.login(user);
   }
 
