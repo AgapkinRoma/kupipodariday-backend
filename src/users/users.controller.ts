@@ -1,14 +1,16 @@
-import { Controller, Get, Patch, Post } from '@nestjs/common';
+import { Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { AuthUser } from 'src/decorators/user.decorator';
 import { User } from './users.entity';
 import { UsersService } from './users.service';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private userService: UsersService) {}
   @Get('/me')
   async getCurrentUser(@AuthUser() user: User) {
-    await this.userService.findOne({
+    const currentUser = await this.userService.findOne({
       where: { id: user.id },
       select: {
         email: true,
@@ -20,6 +22,7 @@ export class UsersController {
         updatedAt: true,
       },
     });
+    return currentUser;
   }
 
   @Patch('/me')

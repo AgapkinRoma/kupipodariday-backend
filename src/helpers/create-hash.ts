@@ -1,7 +1,9 @@
 import * as bcrypt from 'bcrypt';
 
-export function hashValue(value: string) {
-  return bcrypt.hash(value, 10);
+export function hashValue(value: string, salt: number) {
+  if (value) {
+    return bcrypt.hash(value, salt);
+  }
 }
 
 export function verifyHash(value: string, hash: string) {

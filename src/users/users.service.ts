@@ -12,23 +12,30 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
-  async singup(userDto: CreateUserDto): Promise<User> {
+  async signup(userDto: CreateUserDto): Promise<User> {
+    console.log('DTO:', userDto);
     const existUser = await this.userRepository.findOne({
       where: { email: userDto.email },
     });
     if (existUser) {
-      throw new BadRequestException('oshibka');
+      throw new BadRequestException(
+        'Пользователь с таким email уже существует',
+      );
     }
     const { password } = userDto;
-    const user = await this.userRepository.create({
+    const hashedPassword = await hashValue(password, 10);
+    const user = this.userRepository.create({
       ...userDto,
-      password: await hashValue(password),
+      password: hashedPassword,
     });
+    console.log('Пользователь перед сохранением:', user);
     return this.userRepository.save(user);
   }
 
-  async findById(id: number) {
-    return this.userRepository.findOneBy({ id });
+  async findById(id: number): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id });
+    console.log('user', user);
+    return user;
   }
 
   findOne(options: FindOneOptions<User>) {
@@ -39,7 +46,7 @@ export class UsersService {
     const { password } = updateDto;
     const user = await this.findById(id);
     if (password) {
-      updateDto.password = await hashValue(password);
+      updateDto.password = await hashValue(password, 10);
     }
     return this.userRepository.save({ ...user, ...updateDto });
   }

@@ -43,7 +43,7 @@ export class Wish {
   @Length(1, 1024)
   description: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 0 })
   copied: number;
 
   @ManyToOne(() => User, (user) => user.wishes)
