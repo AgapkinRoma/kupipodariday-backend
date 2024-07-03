@@ -7,7 +7,7 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import { Length, IsUrl } from 'class-validator';
+import { Length, IsUrl, IsNotEmpty } from 'class-validator';
 import { User } from 'src/users/users.entity';
 import { WishList } from 'src/wishlists/wishlists.entity';
 import { Offer } from 'src/offers/offers.entity';
@@ -23,7 +23,6 @@ export class Wish {
   updatedAt: Date;
 
   @Column()
-  @Length(1, 250)
   name: string;
 
   @Column()
@@ -33,17 +32,17 @@ export class Wish {
   @IsUrl()
   image: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column()
   price: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ default: 0 })
   raised: number;
 
   @Column()
   @Length(1, 1024)
   description: string;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ default: 0 })
   copied: number;
 
   @ManyToOne(() => User, (user) => user.wishes)

@@ -1,10 +1,16 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from './users.entity';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindOneOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { hashValue } from 'src/helpers/create-hash';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FindUserDto } from './dto/find-user.dto';
 @Injectable()
 export class UsersService {
   constructor(
@@ -13,7 +19,6 @@ export class UsersService {
   ) {}
 
   async signup(userDto: CreateUserDto): Promise<User> {
-    console.log('DTO:', userDto);
     const existUser = await this.userRepository.findOne({
       where: { email: userDto.email },
     });
@@ -28,13 +33,11 @@ export class UsersService {
       ...userDto,
       password: hashedPassword,
     });
-    console.log('Пользователь перед сохранением:', user);
     return this.userRepository.save(user);
   }
 
   async findById(id: number): Promise<User> {
     const user = await this.userRepository.findOneBy({ id });
-    console.log('user', user);
     return user;
   }
 
@@ -51,8 +54,9 @@ export class UsersService {
     return this.userRepository.save({ ...user, ...updateDto });
   }
 
-  async removeOne(id: number) {
-    const deletedUser = await this.userRepository.delete({ id });
-    return deletedUser;
+  async findUser(query: string) {
+    return this.findOne({
+      where: [{ username: Like(`${query}`) }, { email: Like(`${query}`) }],
+    });
   }
 }
