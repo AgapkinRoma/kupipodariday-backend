@@ -7,7 +7,7 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import { Length, IsUrl, IsNotEmpty } from 'class-validator';
+import { Length, IsUrl, IsNotEmpty, IsNumber } from 'class-validator';
 import { User } from 'src/users/users.entity';
 import { WishList } from 'src/wishlists/wishlists.entity';
 import { Offer } from 'src/offers/offers.entity';
@@ -47,7 +47,10 @@ export class Wish {
 
   @ManyToOne(() => User, (user) => user.wishes)
   owner: User;
-  @ManyToOne(() => WishList, (wishlist) => wishlist.wishes)
+  @ManyToOne(() => WishList, (wishlist) => wishlist.wishes, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   wishlist: WishList;
   @OneToMany(() => Offer, (offer) => offer.wish)
   offers: Offer[];

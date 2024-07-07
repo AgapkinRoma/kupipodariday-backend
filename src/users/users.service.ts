@@ -41,8 +41,20 @@ export class UsersService {
     return user;
   }
 
-  findOne(options: FindOneOptions<User>) {
+  async findOne(options: FindOneOptions<User>) {
     return this.userRepository.findOne(options);
+  }
+
+  async findUserByUsername(username: string) {
+    const user = await this.userRepository.findOne({
+      where: { username: username },
+    });
+    if (!user) {
+      throw new NotFoundException(
+        `Пользователь с именем ${username} не найден.`,
+      );
+    }
+    return user;
   }
 
   async updateOne(id: number, updateDto: UpdateUserDto) {
@@ -55,8 +67,14 @@ export class UsersService {
   }
 
   async findUser(query: string) {
-    return this.findOne({
+    const user = await this.userRepository.find({
       where: [{ username: Like(`${query}`) }, { email: Like(`${query}`) }],
     });
+    if (!user) {
+      throw new NotFoundException(
+        `Пользователь по указанному полю ${query} не найден.`,
+      );
+    }
+    return user;
   }
 }

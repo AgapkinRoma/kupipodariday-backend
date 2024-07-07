@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -28,14 +29,17 @@ export class WishesService {
     const ownerWishes = await this.wishesRepository.find({
       where: { owner: { id: ownerId } },
     });
-    if (!ownerWishes) {
+    if (ownerWishes.length === 0) {
       throw new NotFoundException(`У данного пользователя отсутствуют подарки`);
     }
     return ownerWishes;
   }
 
   async getWishById(id: number) {
-    const wish = await this.wishesRepository.findOne({ where: { id } });
+    const wish = await this.wishesRepository.findOne({
+      where: { id },
+      relations: ['offers'],
+    });
     if (!wish) {
       throw new NotFoundException(`Подарок по указанному id ${id} не найден`);
     } else {
@@ -43,25 +47,44 @@ export class WishesService {
     }
   }
 
-  async updateWishData(id: number, updateWishDto: UpdateWishDto) {
-    const wish = await this.wishesRepository.update(id, updateWishDto);
+  async updateWishData(
+    id: number,
+    updateWishDto: UpdateWishDto,
+    userId: number,
+  ) {
+    const wish = await this.wishesRepository.findOne({ where: { id } });
     if (!wish) {
       throw new NotFoundException(`Подарок по указанному id ${id} не найден`);
     }
-    const updatetWish = await this.wishesRepository.findOne({ where: { id } });
-    return updatetWish;
+    if (wish.owner.id !== userId) {
+      throw new ForbiddenException(`Вы не можете редактировать чужой подарок`);
+    }
+    if (wish.raised > 0) {
+      throw new ForbiddenException(
+        `На подарок уже скинулись,поэтому его нельзя редактировать`,
+      );
+    }
+    return this.wishesRepository.save({ ...wish, ...updateWishDto });
   }
 
-  async deleteWish(id: number) {
-    const deletedWish = await this.wishesRepository.delete(id);
-    if (!deletedWish) {
+  async deleteWish(id: number, userId: number) {
+    const wish = await this.wishesRepository.findOne({ where: { id } });
+    if (!wish) {
       throw new NotFoundException(`Подарок по указанному id ${id} не найден`);
     }
+    if (wish.owner.id !== userId) {
+      throw new ForbiddenException(`Вы не можете удалить чужой подарок`);
+    }
+    await this.wishesRepository.delete(wish.id);
     return { message: `Подарок с ${id} успешно удален` };
   }
 
   async findAllWishes() {
-    return this.wishesRepository.find({});
+    const wishes = await this.wishesRepository.find({});
+    if (wishes.length === 0) {
+      throw new NotFoundException(`Еще не было созданно ни одного подарка`);
+    }
+    return wishes;
   }
 
   async copyWish(id: number, userId: number) {

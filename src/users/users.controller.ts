@@ -60,38 +60,17 @@ export class UsersController {
 
   @Get(':username')
   async getUserByUsername(@Param('username') username: string) {
-    const user = await this.userService.findOne({
-      where: { username: username },
-    });
-    if (!user) {
-      throw new NotFoundException(
-        `Пользователь с именем ${username} не найден.`,
-      );
-    }
-    return user;
+    return this.userService.findUserByUsername(username);
   }
 
   @Get(':username/wishes')
   async getWishes(@Param('username') username: string) {
-    const user = await this.userService.findOne({
-      where: { username: username },
-    });
-    if (!user) {
-      throw new NotFoundException(
-        `Пользователь с именем ${username} не найден.`,
-      );
-    }
+    const user = await this.userService.findUserByUsername(username);
     return this.wishesService.findOwnerWishes(user.id);
   }
 
   @Post('/find')
   async findMany(@Query('query') query: string) {
-    const user = await this.userService.findUser(query);
-    if (!user) {
-      throw new NotFoundException(
-        `Пользователь по указанному полю ${query} не найден.`,
-      );
-    }
-    return user;
+    return this.userService.findUser(query);
   }
 }

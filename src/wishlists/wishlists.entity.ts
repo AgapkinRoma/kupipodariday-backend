@@ -26,7 +26,7 @@ export class WishList {
   @Length(1, 250)
   name: string;
 
-  @Column()
+  @Column({ default: 'default description' })
   @Length(1, 1500)
   description: string;
 
