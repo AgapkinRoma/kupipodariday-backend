@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -52,7 +53,10 @@ export class WishesService {
     updateWishDto: UpdateWishDto,
     userId: number,
   ) {
-    const wish = await this.wishesRepository.findOne({ where: { id } });
+    const wish = await this.wishesRepository.findOne({
+      where: { id },
+      relations: ['owner'],
+    });
     if (!wish) {
       throw new NotFoundException(`Подарок по указанному id ${id} не найден`);
     }
@@ -68,7 +72,10 @@ export class WishesService {
   }
 
   async deleteWish(id: number, userId: number) {
-    const wish = await this.wishesRepository.findOne({ where: { id } });
+    const wish = await this.wishesRepository.findOne({
+      where: { id },
+      relations: ['owner'],
+    });
     if (!wish) {
       throw new NotFoundException(`Подарок по указанному id ${id} не найден`);
     }
@@ -92,7 +99,13 @@ export class WishesService {
       where: { id },
       relations: ['owner'],
     });
-    console.log('ownerid', wishToCopy.owner.id);
+    const existWishToCopy = await this.wishesRepository.findOneBy({
+      name: wishToCopy.name,
+      owner: { id: userId },
+    });
+    if (existWishToCopy) {
+      throw new ConflictException(`Вы уже копировали к себе этот подарок`);
+    }
     if (!wishToCopy) {
       throw new NotFoundException(`Подарок по указанному id ${id} не найден`);
     }

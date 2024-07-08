@@ -40,7 +40,10 @@ export class UsersController {
     });
     return currentUser;
   }
-
+  @Get()
+  async findAllUsers() {
+    return this.userService.findAllUsers();
+  }
   @Patch('/me')
   async updateCurrentUserData(
     @AuthUser() user: User,

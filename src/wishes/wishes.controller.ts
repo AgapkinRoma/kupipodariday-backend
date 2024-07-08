@@ -14,6 +14,7 @@ import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UpdateWishDto } from './dto/update-wish.dto';
+
 @UseGuards(JwtAuthGuard)
 @Controller('wishes')
 export class WishesController {
@@ -54,6 +55,7 @@ export class WishesController {
   ) {
     return this.wishesService.updateWishData(id, updateWishDto, user.id);
   }
+
   @Delete(':id')
   async deleteWish(@Param('id') id: number, @AuthUser() user: User) {
     return this.wishesService.deleteWish(id, user.id);

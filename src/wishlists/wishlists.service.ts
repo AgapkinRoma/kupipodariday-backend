@@ -48,7 +48,10 @@ export class WishlistsService {
     return wishlist;
   }
   async deleteWishlistById(id: number, userId: number) {
-    const wishlist = await this.wishlistRepository.findOne({ where: { id } });
+    const wishlist = await this.wishlistRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
     if (!wishlist) {
       throw new NotFoundException(`Вишлист по указанному id ${id} не найден`);
     }
@@ -65,7 +68,7 @@ export class WishlistsService {
   ) {
     const wishlist = await this.wishlistRepository.findOne({
       where: { id },
-      relations: ['wishes'],
+      relations: ['wishes', 'user'],
     });
     const wishes = await this.wishRepository.findByIds(
       updateWishlistDto.wishesId,
